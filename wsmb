@@ -1,0 +1,46 @@
+#!/bin/bash
+#Nmap Full Vuln Scan
+
+if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "help" ] || [ "$1" == "-help" ] ; then
+echo "[*] SMB Nmap NSE Scanner"
+echo "[*] Usage: wsmb <domain name> -options"
+echo "[*] Options = -e (enum4linux)"
+echo "[*] Following SMB NSE scripts are available on your computer: "
+locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r
+exit 0
+fi
+
+while ! ping -c1 $1 &>/dev/null
+do echo "[*] FATAL - HOST NOT FOUND!"
+echo "[*] SMB Nmap NSE Scanner"
+echo "[*] Usage: wsmb <domain name> -options"
+echo "[*] Options = -e (enum4linux)"
+echo "[*] Following SMB NSE scripts are available on your computer: "
+locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r
+exit 0
+done
+
+if [ ! -d ~/Desktop/$1-SMBScan ]; then
+mkdir ~/Desktop/$1-SMBScan
+else
+ 
+rm -rf ~/Desktop/$1-SMBScan/*
+fi
+
+if [ "$2" == "-e" ]; then
+enum4linux $1 > ~/Desktop/$1-SMBScan/enum4linux.txt &
+echo "[*] Running enum4linux on host"
+fi
+
+for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
+nmap -p139,445 -script $a $1 --open > ~/Desktop/$1-SMBScan/$a.txt &
+echo "[*] Running $a"
+wait
+if grep -q vulnerable ~/Desktop/$1-SMBScan/$a.txt ]; then
+echo "[*] Seems Vulnerable to $a"
+fi
+done
+
+echo "[*] End of Script!"
+
+#add an enum4linux flag
