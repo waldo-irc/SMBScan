@@ -10,3 +10,5 @@ These Dependencies are:
 *Nmap
 *Enum4linux
 *nbtscan
+
+It can scan a subrange since it just uses nmap for the heavy lifting.
