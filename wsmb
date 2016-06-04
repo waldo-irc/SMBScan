@@ -6,17 +6,22 @@ if [ -z "$1" ]; then
 echo "[*] SMB Nmap NSE Scanner"
 echo "[*] Usage: wsmb <target> [options]"
 echo "options:"
-echo "-h                            show brief help"
-echo "-l                            list SMB NSE Scripts"
+echo "-h                            Show Brief Help"
+echo "-l                            List SMB NSE Scripts"
 echo "-n                            Include NBTScan"
 echo "-e                            Include Enum4Linux Scan"
+echo "-s                            Enumerate IP Range with Ports 139,445 Open"
+echo "-c                            Run scan and empty directory"
+echo "-cx                           Empty dir without scan"
 exit 0
 fi
 
-#And here we do a check to see if the directory this script makes already exists.
-if [ ! -d ~/Desktop/$1-SMBScan ]; then
-mkdir ~/Desktop/$1-SMBScan
-mkdir ~/Desktop/$1-SMBScan/NSE
+#store our final octet for final naming into $host
+if [[ $1 == *[/]* ]]; then
+hostl=$(echo $1 | cut -d"." -f4 | cut -d"/" -f2)
+host="sub$hostl"
+else
+host=$(echo $1 | cut -d"." -f4)
 fi
 
 #Here we set up our options and arguments
@@ -29,52 +34,106 @@ for arg; do
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
+            echo "-s                            Enumerate an ip or a range of IPS for SMB ports 139,445"
+            echo "-c                            Run scan and empty directory"
+            echo "-cx                           Empty dir without scan"
             exit 0;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
 	    locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
-            nbtscan $1 > ~/Desktop/$1-SMBScan/nbtscan.txt & ;;
-        -e) echo "[*] Running Enum4Linux Against Target"
-            enum4linux $1 > ~/Desktop/$1-SMBScan/enum4linux.txt & ;;
+            if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
+            mkdir ~/Desktop/$host-SMBScan
+            mkdir ~/Desktop/$host-SMBScan/NSE
+            fi
+            if [ "$1" == "-n" ]; then
+            echo "[*] Error, must specify a target"
+            exit 0
+            else
+            nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
+            wait 
+            fi ;;
+        -e) echo "[*] Running Enum4Linux Against Target - This could take a while."
+            if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
+            mkdir ~/Desktop/$host-SMBScan
+            mkdir ~/Desktop/$host-SMBScan/NSE
+            fi
+            if [ "$1" == "-e" ]; then
+            echo "[*] Error, must specify a target"
+            exit 0
+            else
+            enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
+            wait
+            grep -i os= ~/Desktop/$host-SMBScan/enum4linux.txt 
+            fi ;;
         -c) if [ "$1" == "-c" ]; then
             echo "[*] Error, must specifiy which directory to clear with target name"
+            echo "[*] Ex: wsmb 192.168.1.25 -c" 
             exit 0
             fi
-            if [ -d ~/Desktop/$1-SMBScan ]; then
+            if [ -d ~/Desktop/$host-SMBScan ]; then
             echo "[*] Cleaning Directory"
-            rm -rf ~/Desktop/$1-SMBScan/NSE/* &
+            rm -rf ~/Desktop/$host-SMBScan/NSE/* &
             else
             echo "[*] Directory Does Not Exist!"
             fi;;
+        -cx)if [ "$1" == "-cx" ]; then
+            echo "[*] Error, must specifiy which directory to clear with target name"
+            echo "[*] Ex: wsmb 192.168.1.25 -cx" 
+            exit 0
+            fi
+            if [ -d ~/Desktop/$host-SMBScan ]; then
+            echo "[*] Cleaning Directory"
+            rm -rf ~/Desktop/$host-SMBScan/NSE/* &
+            else
+            echo "[*] Directory Does Not Exist!"
+            fi
+            exit 0;;
+        -s) echo "[*] Checking for SMB Servers:"
+            if [ "$1" == "-s" ]; then
+            echo "[*] Error! Must be used with a target or range."
+            echo "[*] Ex: wsmb 192.168.25.0/24 -s"
+            else
+            nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5
+            fi
+            exit 0;;
         -*) echo "[*] SMB Nmap NSE Scanner"
             echo "[*] Usage: wsmb <domain name> -options"
             echo "options:"
             echo "-h, --help                    show brief help"
             echo "-l                            list SMB NSE Scripts"
+            echo "-n                            Include NBTScan"
+            echo "-e                            Include Enum4Linux Scan"
+            echo "-s                            Enumerate an ip or a range of IPS for SMB ports 139,445"
+            echo "-c                            Run scan and empty directory"
+            echo "-cx                           Empty dir without scan"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
     esac
 done
 
-if [ ! -d ~/Desktop/$1-SMBScan ]; then
-mkdir ~/Desktop/$1-SMBScan/NSE
-fi
-
 #Here we check to make sure the host is up before continuing.
+if [[ $1 != *[/]* ]] ; then
 while ! ping -c1 $1 &>/dev/null
 do echo "[*] Fatal Error - Host Down!"
 exit 0 
 done 
+fi
+
+#And here we do a check to see if the directory this script makes already exists.
+if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
+mkdir ~/Desktop/$host-SMBScan
+mkdir ~/Desktop/$host-SMBScan/NSE
+fi
 
 #Finally, we take the IP here and run it against every SMB NSE Vuln script found on your host machine and output it into a file in our folder and grep to see if we found a vuln
 for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
-nmap -p139,445 -script $a $1 --open > ~/Desktop/$1-SMBScan/NSE/$a.txt &
+nmap -p139,445 -script $a $1 --open > ~/Desktop/$host-SMBScan/NSE/$a.txt &
 echo "[*] Running $a"
 wait
-if grep -q "VULNERABLE" ~/Desktop/$1-SMBScan/NSE/$a.txt; then
+if grep -q "VULNERABLE" ~/Desktop/$host-SMBScan/NSE/$a.txt; then
    echo "[!!] $1 Seems Vulnerable to $a!"
  fi
 done
 
-echo "[*] Executed Successfully! Check folder in ~/Desktop/$1-SMBScan for results"
+echo "[*] Executed Successfully! Check folder in ~/Desktop/$host-SMBScan for results"
