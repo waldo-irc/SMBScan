@@ -11,6 +11,7 @@ echo "-h, --help                    Show Brief Help"
 echo "-l                            List SMB NSE Scripts"
 echo "-n                            Include NBTScan"
 echo "-e                            Include Enum4Linux Scan"
+echo "-sh                           List and login to an SMB Share"
 echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
 echo "-qs                           Run a quick SMB Scan"
 echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
@@ -38,6 +39,7 @@ for arg; do
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
+            echo "-sh                           List and login to an SMB Share"
             echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
             echo "-qs                           Run a quick SMB Scan"
             echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
@@ -101,7 +103,7 @@ for arg; do
             fi
             exit 0;;
         -sb) echo "[*] Checking for All SMB Servers in subnet with banner grabbing (slower scan):"
-            if [ "$1" == "-s" ]; then
+            if [ "$1" == "-sb" ]; then
                  echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
                  echo "[*] Ex: wsmb 192.168.25.1 -sb"
             else
@@ -142,7 +144,7 @@ for arg; do
             fi
             exit 0;;
         -qs) echo "[*] Checking for SMB Servers:"
-            if [ "$1" == "-s" ]; then
+            if [ "$1" == "-qs" ]; then
                  echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
                  echo "[*] Ex: wsmb 192.168.25.* -qs"
                  echo "[*] EX: wsmb 192.168.25.1 -qs"
@@ -158,6 +160,24 @@ for arg; do
                  fi
             fi
             exit 0;;
+        -sh) echo "[*] Listing SMB Shares"
+            if [ "$1" == "-sh" ]; then
+            echo "[*] Error!  Must be used with a target host or IP!"
+            echo "[*] List and enter SMB Shares"
+            echo "[*] Usage: wsmb <host> -sh"
+            else
+            smbclient -L $1
+            read -p "[*] Would you like to access smb share? (Y/n): " answer;
+            if [ "$answer" == y ] || [ "$answer" == Y ] || [ -z "$answer" ]; then
+            read -p "[*] Choose an SMB share to access: " smb;
+            read -p "[*] Choose a user to login with (leave blank for anon): " user;
+            read -p "[*] Enter user password (leave blank for anon): " pass;
+            smbclient //"$1"/"$smb" -U "$user"%"$pass"
+            else
+            exit 0
+            fi
+            fi
+            exit 0;;
         -*) echo "[*] SMB Nmap NSE Scanner"
             echo "[*] Runs all available SMB NSE Scripts gainst victim target"
             echo "[*] Usage: wsmb <domain name> -options"
@@ -166,6 +186,7 @@ for arg; do
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
+            echo "-sh                           List and login to an SMB Share"
             echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
             echo "-qs                           Run a quick SMB Scan"
             echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
