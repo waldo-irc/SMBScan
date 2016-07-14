@@ -4,13 +4,16 @@
 #First part checks to make sure we have a host or any variable given.  If not, help options are displayed
 if [ -z "$1" ]; then
 echo "[*] SMB Nmap NSE Scanner"
+echo "[*] Runs all available SMB NSE Scripts gainst victim target"
 echo "[*] Usage: wsmb <target> [options]"
 echo "options:"
-echo "-h                            Show Brief Help"
+echo "-h, --help                    Show Brief Help"
 echo "-l                            List SMB NSE Scripts"
 echo "-n                            Include NBTScan"
 echo "-e                            Include Enum4Linux Scan"
-echo "-s                            Enumerate IP Range with Ports 139,445 Open"
+echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
+echo "-qs                           Run a quick SMB Scan"
+echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
 exit 0
@@ -28,18 +31,26 @@ fi
 for arg; do
     case $arg in
         -h) echo "[*] SMB Nmap NSE Scanner"
+            echo "[*] Runs all available SMB NSE Scripts gainst victim target"
             echo "[*] Usage: wsmb <domain name> -options"
             echo "options:"
             echo "-h, --help                    show brief help"
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
-            echo "-s                            Enumerate an ip or a range of IPS for SMB ports 139,445"
+            echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
+            echo "-qs                           Run a quick SMB Scan"
+            echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
             exit 0;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
+            if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
+            echo "[*] Error, -l must be only argument"
+            else
 	    locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
+            echo "[*] End"
+            fi
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
             if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
@@ -89,22 +100,75 @@ for arg; do
             echo "[*] Directory Does Not Exist!"
             fi
             exit 0;;
-        -s) echo "[*] Checking for SMB Servers:"
+        -sb) echo "[*] Checking for All SMB Servers in subnet with banner grabbing (slower scan):"
             if [ "$1" == "-s" ]; then
-            echo "[*] Error! Must be used with a target or range."
-            echo "[*] Ex: wsmb 192.168.25.0/24 -s"
+                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
+                 echo "[*] Ex: wsmb 192.168.25.1 -sb"
             else
-            nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5
+            echo "[*]Open SMB Servers" > ~/Desktop/SMBScan.txt
+                 for a in $(seq 0 254); do
+                      b=$(echo $1 | cut -d"." -f1,2,3)
+                      c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
+                      if [ -z "$c" ]; then
+                           :
+                      else
+                           d=$(nmap -p139,445 -sV $b.$a --open | grep "139/tcp" | cut -d' ' -f5,6 )
+                           e=$(host $c | cut -d" " -f5)
+                           echo "$c $e [+$d]" >> ~/Desktop/SMBScan.txt
+                           echo "$c $e [+$d]"
+                      fi
+                 done
+            echo "[*]End" >> ~/Desktop/SMBScan.txt
+            fi
+            exit 0;;
+        -s) echo "[*] Checking for All SMB Servers in subnet:"
+            if [ "$1" == "-s" ]; then
+                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
+                 echo "[*] Ex: wsmb 192.168.25.1 -s"
+            else
+                 echo "[*]Open SMB Servers" > ~/Desktop/SMBScan.txt
+                 for a in $(seq 0 254); do
+                      b=$(echo $1 | cut -d"." -f1,2,3)
+                      c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
+                      if [ -z "$c" ]; then
+                           :
+                      else
+                           d=$(host $c | cut -d" " -f5)
+                           echo "$c $d" >> ~/Desktop/SMBScan.txt
+                           echo "$c $d"
+                      fi
+                 done
+            echo "[*]End" >> ~/Desktop/SMBScan.txt
+            fi
+            exit 0;;
+        -qs) echo "[*] Checking for SMB Servers:"
+            if [ "$1" == "-s" ]; then
+                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
+                 echo "[*] Ex: wsmb 192.168.25.* -qs"
+                 echo "[*] EX: wsmb 192.168.25.1 -qs"
+            else
+                 a=$(echo $1 | cut -d"." -f4 | cut -d"/" -f1)
+                 if [[ "$a" != "*" ]] && [[ "$a" != "0" ]]; then
+                      smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
+                      echo "$smb [+OPEN]" 
+                 else 
+                      smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
+                      echo "$smb"
+                      echo "[*]Scan Finished"
+                 fi
             fi
             exit 0;;
         -*) echo "[*] SMB Nmap NSE Scanner"
+            echo "[*] Runs all available SMB NSE Scripts gainst victim target"
             echo "[*] Usage: wsmb <domain name> -options"
             echo "options:"
             echo "-h, --help                    show brief help"
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
-            echo "-s                            Enumerate an ip or a range of IPS for SMB ports 139,445"
+            echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
+            echo "-qs                           Run a quick SMB Scan"
+            echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
             exit 0;;
@@ -113,12 +177,12 @@ for arg; do
 done
 
 #Here we check to make sure the host is up before continuing.
-if [[ $1 != *[/]* ]] ; then
-while ! ping -c1 $1 &>/dev/null
-do echo "[*] Fatal Error - Host Down!"
-exit 0 
-done 
-fi
+#if [[ $1 != *[/]* ]] ; then
+#while ! ping -c1 $1 &>/dev/null
+#do echo "[*] Fatal Error - Host Down!"
+#exit 0 
+#done 
+#fi
 
 #And here we do a check to see if the directory this script makes already exists.
 if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
@@ -133,7 +197,7 @@ echo "[*] Running $a"
 wait
 if grep -q "VULNERABLE" ~/Desktop/$host-SMBScan/NSE/$a.txt; then
    echo "[!!] $1 Seems Vulnerable to $a!"
- fi
+fi
 done
 
 echo "[*] Executed Successfully! Check folder in ~/Desktop/$host-SMBScan for results"
