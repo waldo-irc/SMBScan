@@ -22,13 +22,25 @@ echo "--update                      Updates WSMB"
 exit 0
 fi
 
-VERSION=1.0.3
+ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
+VERSION=1.0.4
+
+if [ -z "$DBUPDATE" ]; then
+     echo "[*] Updating Database"
+     updatedb
+else
+     export DBUPDATE="Y"
+     source $ABSOLUTE_PATH
+fi
+
 #store our final octet for final naming into $host
 if [[ $1 == *[/]* ]]; then
      hostl=$(echo $1 | cut -d"." -f4 | cut -d"/" -f2)
      host="sub$hostl"
-else
+elif echo "$1" | grep '[0-9]' >/dev/null; then
      host=$(echo $1 | cut -d"." -f4)
+else
+     host=$1
 fi
 
 #Here we set up our options and arguments
@@ -203,9 +215,8 @@ for arg; do
                  git=$(curl --silent https://github.com/barthyala/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
                  echo "$git Git Version"
                  echo "$VERSION Installed Version"
-                 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
                  #Uncomment below for debugging
-                 #echo "$ABSOLUTE_PATH"
+                 echo "$ABSOLUTE_PATH"
                  if [ "$git" == "$VERSION" ]; then
                       echo "[*] Installed Version is latest"
                  else
