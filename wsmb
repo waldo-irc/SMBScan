@@ -30,7 +30,7 @@ if [ -z "$DBUPDATE" ]; then
      updatedb
 else
      export DBUPDATE="Y"
-     source $ABSOLUTE_PATH
+     source "$ABSOLUTE_PATH"
 fi
 
 #store our final octet for final naming into $host
