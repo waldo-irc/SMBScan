@@ -210,6 +210,12 @@ for arg; do
                       echo "[*] Installed Version is latest"
                  else
                       echo "[*] Needs an update!"
+                      git clone https://github.com/barthyala/SMBScan
+                      echo "[*] Installing to $ABSOLUTE_PATH"
+                      mv SMBScan/wsmb $ABSOLUTE_PATH
+                      echo "[*] Cleaning up"
+                      wait
+                      rm -R SMBScan
                  fi
             fi
             exit 0;;
