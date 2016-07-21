@@ -11,6 +11,7 @@ echo "-h, --help                    Show Brief Help"
 echo "-l                            List SMB NSE Scripts"
 echo "-n                            Include NBTScan"
 echo "-e                            Include Enum4Linux Scan"
+echo "-map                          Enumerate with smbmap"
 echo "-sh                           List and login to an SMB Share"
 echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
 echo "-qs                           Run a quick SMB Scan"
@@ -21,13 +22,13 @@ echo "--update                      Updates WSMB"
 exit 0
 fi
 
-VERSION=1.0.2
+VERSION=1.0.3
 #store our final octet for final naming into $host
 if [[ $1 == *[/]* ]]; then
-hostl=$(echo $1 | cut -d"." -f4 | cut -d"/" -f2)
-host="sub$hostl"
+     hostl=$(echo $1 | cut -d"." -f4 | cut -d"/" -f2)
+     host="sub$hostl"
 else
-host=$(echo $1 | cut -d"." -f4)
+     host=$(echo $1 | cut -d"." -f4)
 fi
 
 #Here we set up our options and arguments
@@ -41,6 +42,7 @@ for arg; do
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
+            echo "-map                          Enumerate with smbmap"
             echo "-sh                           List and login to an SMB Share"
             echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
             echo "-qs                           Run a quick SMB Scan"
@@ -69,6 +71,15 @@ for arg; do
                  nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             wait 
             fi ;;
+        -map) echo "[*] Mapping Shares with SMBMap"
+            if [ "$1" == "-map" ]; then
+                 echo "[*] Error, must specifiy a host to map"
+                 echo "[*] Ex: wsmb 192.168.1.25 -map" 
+                 exit 0
+            else
+                 smbmap -H $1
+            fi
+            exit 0;;
         -e) echo "[*] Running Enum4Linux Against Target - This could take a while."
             if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
                  mkdir ~/Desktop/$host-SMBScan
@@ -212,6 +223,7 @@ for arg; do
             echo "-l                            list SMB NSE Scripts"
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
+            echo "-map                          Enumerate with smbmap"
             echo "-sh                           List and login to an SMB Share"
             echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
             echo "-qs                           Run a quick SMB Scan"
