@@ -242,14 +242,6 @@ for arg; do
     esac
 done
 
-#Here we check to make sure the host is up before continuing.
-#if [[ $1 != *[/]* ]] ; then
-#while ! ping -c1 $1 &>/dev/null
-#do echo "[*] Fatal Error - Host Down!"
-#exit 0 
-#done 
-#fi
-
 #And here we do a check to see if the directory this script makes already exists.
 if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
      mkdir ~/Desktop/$host-SMBScan
