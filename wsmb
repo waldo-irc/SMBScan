@@ -17,6 +17,9 @@ echo "-qs                           Run a quick SMB Scan"
 echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
+#add update caps
+#add smb brute force
+#add smbscan smb filesystem scan
 exit 0
 fi
 
