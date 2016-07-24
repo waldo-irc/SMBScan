@@ -9,10 +9,7 @@ Uses Nmap, Enum4linux, NBTSCAN, etc. in order to scan smb for vulnerabilities an
 
 It can scan a subrange since it just uses nmap for the heavy lifting.
 
-if [ -z "$1" ]; then
-[*] SMB Nmap NSE Scanner
-[*] Runs all available SMB NSE Scripts gainst victim target
- Usage: wsmb <target> [options]
+Usage: wsmb <target> [options]
 options:"
 -h, --help                    Show Brief Help
 -l                            List SMB NSE Scripts
