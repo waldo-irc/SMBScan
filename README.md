@@ -41,22 +41,30 @@ options:
 <br />
 --update                      Updates WSMB
 <br />
-Current Version 1.0.3
+<strong>Current Version 1.0.3</strong>
 <br />
 # Usage Examples
 <br />
+<br />
 It has the ability to check for ports 139,445 SMB.  You can search for all servers with these ports open by running:
+<br />
 <br />
 wsmb 192.168.1.* -qs
 <br />
+<br />
 This does a quick scan in order to get an idea of every machine with ports 139,445 open on your subnet.  -s defaults to a full scan with hostname enumeration and -sb includes nmap banner grabbing as well.
+<br />
 <br />
 Once you've decided on a target, you can run every smb nse script available on your system against the target with:
 <br />
+<br />
 wsmb 192.168.1.1
+<br />
 <br />
 And if you'd like you can include enum4linux with -e and an NBTScan with -n
 <br />
+<br />
 Everything you scan will be saved in a corresponding file with the scan name in a folder named (last 2 digits of IP)/hostname-SMBScan on your Desktop.
+<br />
 <br />
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
