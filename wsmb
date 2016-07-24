@@ -17,9 +17,6 @@ echo "-qs                           Run a quick SMB Scan"
 echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
-#add update caps
-#add smb brute force
-#add smbscan smb filesystem scan
 exit 0
 fi
 
@@ -52,22 +49,22 @@ for arg; do
             exit 0;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
             if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
-            echo "[*] Error, -l must be only argument"
+                 echo "[*] Error, -l must be only argument"
             else
-	    locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
-            echo "[*] End"
+	         locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
+                 echo "[*] End"
             fi
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
             if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
-            mkdir ~/Desktop/$host-SMBScan
-            mkdir ~/Desktop/$host-SMBScan/NSE
+                 mkdir ~/Desktop/$host-SMBScan
+                 mkdir ~/Desktop/$host-SMBScan/NSE
             fi
             if [ "$1" == "-n" ]; then
-            echo "[*] Error, must specify a target"
+                 echo "[*] Error, must specify a target"
             exit 0
             else
-            nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
+                 nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             wait 
             fi ;;
         -e) echo "[*] Running Enum4Linux Against Target - This could take a while."
@@ -181,6 +178,28 @@ for arg; do
             exit 0
             fi
             fi
+            exit 0;;
+        -brute) smbclient //"$1"/"$smb" -U "$user"%"$pass" 
+            exit 0;;
+        --update) echo "[*] wsmb Version $VERSION"
+            echo "[*] Updating WSMB"
+            if [ "$1" != "--update" ]; then
+                 echo "[*] Error!  Must be used as wsmb --update"
+            else
+                 git=$(curl --silent https://github.com/barthyala/SMBScan/blob/master/wsmb | grep "VERSION" | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
+                 echo "$git Git Version"
+                 echo "$VERSION Installed Version"
+                 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
+                 #Uncomment below for debugging
+                 #echo "$ABSOLUTE_PATH"
+                 if [ "$git" == "$VERSION" ]; then
+                      echo "[*] Installed Version is latest"
+                 else
+                      echo "[*] Needs an update!"
+                 fi
+            fi
+            exit 0;;
+        --version) echo "[*] Version $VERSION"
             exit 0;;
         -*) echo "[*] SMB Nmap NSE Scanner"
             echo "[*] Runs all available SMB NSE Scripts gainst victim target"
