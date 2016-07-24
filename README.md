@@ -1,4 +1,4 @@
-# SMBScan
+# SMBScan <strong>Current Version 1.0.3</strong>
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
@@ -41,7 +41,6 @@ options:
 <br />
 --update                      Updates WSMB
 <br />
-<strong>Current Version 1.0.3</strong>
 <br />
 # Usage Examples
 <br />
