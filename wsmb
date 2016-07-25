@@ -37,13 +37,13 @@ elif [ "$1" != "--update" ]; then
 fi
 
 #checks for first time run in order to update Locate DB
-if grep -q "WUPDATE=1" ~/.bashrc; then
-     :
-else
-     echo "[*] Updating Database"
-     updatedb     
-     echo "WUPDATE=1" >> ~/.bashrc
-fi
+#if grep -q "WUPDATE=1" ~/.bashrc; then
+#     :
+#else
+#     echo "[*] Updating Database"
+#     updatedb     
+#     echo "WUPDATE=1" >> ~/.bashrc
+#fi
 
 #store our final octet for final naming into $host
 if [[ $1 == *[/]* ]]; then
@@ -79,6 +79,8 @@ for arg; do
             if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
                  echo "[*] Error, -l must be only argument"
             else
+                 updatedb
+                 wait
 	         locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
                  echo "[*] End"
             fi
@@ -271,6 +273,8 @@ if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
 fi
 
 #Finally, we take the IP here and run it against every SMB NSE Vuln script found on your host machine and output it into a file in our folder and grep to see if we found a vuln
+updatedb
+wait
 for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
      nmap -p139,445 -script $a $1 --open > ~/Desktop/$host-SMBScan/NSE/$a.txt &
      echo "[*] Running $a"
