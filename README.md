@@ -1,4 +1,4 @@
-# SMBScan - Current Version 1.0.3
+# SMBScan - Current Version 1.0.4
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
@@ -67,3 +67,11 @@ Everything you scan will be saved in a corresponding file with the scan name in 
 <br />
 <br />
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
+
+#Changelog
+*1.0.4 
+<ul>
+<li>Added Automatic Version checking (updates are done manually in case you'd like to wait for whatever reason)</li>
+<li>Fixed folder naming system for certain hosts</li>
+<li>Now set to properly update Locate DB</li>
+</ul>
