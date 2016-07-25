@@ -22,18 +22,9 @@ echo "--update                      Updates WSMB"
 exit 0
 fi
 
+#setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
 VERSION=1.0.4
-
-#checks for updates and notifies if available
-git=$(curl --silent https://github.com/barthyala/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
-if [ "$git" == "$VERSION" ]; then
-     :
-else
-     echo "[*] Update Available"
-     echo "[*] Version update from $VERSION to $git"
-     echo "[*] Read Changelog for more info. https://github.com/barthyala/SMBScan/blob/master/README.md"
-fi
 
 #checks for first time run in order to update Locate DB
 if grep -q "WUPDATE=1" ~/.bashrc; then
@@ -279,5 +270,15 @@ for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1
           echo "[!!] $1 Seems Vulnerable to $a!"
      fi
 done
+
+#checks for updates and notifies if available
+git=$(curl --silent https://github.com/barthyala/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
+if [ "$git" == "$VERSION" ]; then
+     :
+elif [ "$1" != "--update" ]; then
+     echo "[****] Update Available"
+     echo "[****] Version update from $VERSION to $git"
+     echo "[****] Read Changelog for more info. https://github.com/barthyala/SMBScan/blob/master/README.md"
+fi
 
 echo "[*] Executed Successfully! Check folder in ~/Desktop/$host-SMBScan for results"
