@@ -82,7 +82,6 @@ for arg; do
             if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
                  echo "[*] Error, -l must be only argument"
             else
-                 wait
 	         locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
                  echo "[*] End"
             fi
@@ -275,7 +274,6 @@ if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
 fi
 
 #Finally, we take the IP here and run it against every SMB NSE Vuln script found on your host machine and output it into a file in our folder and grep to see if we found a vuln
-wait
 for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
      nmap -p139,445 -script $a $1 --open > ~/Desktop/$host-SMBScan/NSE/$a.txt &
      echo "[*] Running $a"
