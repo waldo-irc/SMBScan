@@ -1,4 +1,4 @@
-# SMBScan - Current Version 1.0.3
+# SMBScan - Current Version 1.0.4
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
