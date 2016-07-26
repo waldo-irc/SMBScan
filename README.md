@@ -5,6 +5,8 @@ Scans SMB for Vulnerabilities Assessment
 Work in progress, looking to implement several things still.
 Uses nmap but packages all the NSE scans in one script for quick assessment instead of having to pop each NSE one by one!
 Also does Enum4linux with -e flag and nbtscan with -n flag.
+
+Please use responsibly and with permission only.  I do not condone unauthorized uses and will not be responsible for anything unethical commited with these.
 <br />
 <br />
 Uses Nmap, Enum4linux, NBTSCAN, etc. in order to scan smb for vulnerabilities and enumerating shares and samba servers.
