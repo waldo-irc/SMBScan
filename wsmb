@@ -26,7 +26,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.6
+VERSION=1.0.61
 
 # Use `$echoLog` everywhere you print verbose logging messages to console
 # By default, it is disabled and will be enabled with the `-v` or `--verbose` flags
@@ -267,6 +267,7 @@ for arg; do
                       echo "[*] Cleaning up"
                       wait
                       rm -R SMBScan
+                      echo "[*] Installed Version updated to $VERSION"
                  fi
             fi
             exit 0;;
