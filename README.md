@@ -71,6 +71,8 @@ Everything you scan will be saved in a corresponding file with the scan name in 
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
 
 #Changelog
+** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+
 *1.0.61
 <ul>
 <li> Minor fixes.</li>
