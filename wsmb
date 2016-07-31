@@ -267,7 +267,7 @@ for arg; do
                       echo "[*] Cleaning up"
                       wait
                       rm -R SMBScan
-                      echo "[*] Installed Version updated to $VERSION"
+                      echo "[*] Installed Version updated to $git"
                  fi
             fi
             exit 0;;
