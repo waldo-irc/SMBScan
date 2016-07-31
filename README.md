@@ -72,6 +72,7 @@ Several more features to come so a --update feature was added to automatically u
 
 #Changelog
 ** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+
 *1.0.62
 <ul>
 <li> New ASCII intro.</li>
