@@ -1,4 +1,4 @@
-# SMBScan - Current Version 1.0.62
+# SMBScan - Current Version 2.0.0
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
@@ -72,6 +72,14 @@ Several more features to come so a --update feature was added to automatically u
 
 #Changelog
 ** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+
+*2.0.0
+<ul>
+<li> Complete restructure with functions to handle bulkwork. Further optimization planned to come.</li>
+<li> Verbosity now works more effictively and as planned.  Continued plans to improve.</li>
+<li> Minor bug fixes including SMB Brute force fix</li>
+</ul>
+
 *1.0.62
 <ul>
 <li> New ASCII intro.</li>

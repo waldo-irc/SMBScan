@@ -86,8 +86,9 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.62
+VERSION=2.0.0
 
+#Setting up functions[*]
 # Use `$echoLog` everywhere you print verbose logging messages to console
 # By default, it is disabled and will be enabled with the `-v` or `--verbose` flags
 declare echoLog='silentEcho'
@@ -95,10 +96,57 @@ function silentEcho() {
     :
 }
 
-#start verbose, this way it runs as first argument.
+#Locates smb nse scripts on your pc
+loc () {
+     #$echoLog "[+verbose] finding nmap/scripts/smb " 
+     locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r
+}
+
+#here we do a check to see if the directory this script makes already exists.
+direxist () {
+$echoLog "[+verbose] Checking to see if directory exists for creation."
+if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
+     $echoLog "[+verbose] mkdir ~/Desktop/$host-SMBScan"
+     mkdir ~/Desktop/$host-SMBScan
+     $echoLog "[+verbose] ~/Desktop/$host-SMBScan/NSE"
+     mkdir ~/Desktop/$host-SMBScan/NSE
+fi
+} 
+
+cleandirexist () { 
+if [ -d ~/Desktop/$host-SMBScan ]; then
+     echo "[*] Cleaning Directory"
+     rm -rf ~/Desktop/$host-SMBScan/NSE/* &
+else
+     echo "[*] Directory Does Not Exist!"
+fi
+}
+
+checkarg () {
+if [ "$1" == "$2" ]; then
+     echo "[*] $3"
+     exit 0
+fi
+}
+
+snapshot () {
+read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
+if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
+     gnome-screenshot --window -f ~/Desktop/$host-SMBScan/$1.jpg
+fi
+}
+#End Functions[*]
+
+#These arguments need to run first always.
 for arg; do
     case $arg in
-      -v) echoLog='echo'; ;;
+      -v) checkarg $1 -v "Error, must specify a target"
+          echoLog='echo'; ;;
+      -c) checkarg $1 -c "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -c"
+          cleandirexist;;
+      -cx) checkarg $1 -cx "[*] Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -cx"
+          cleandirexist
+          exit 0;;
     esac
 done
 
@@ -137,176 +185,110 @@ for arg; do
             if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
                  echo "[*] Error, -l must be only argument"
             else
-                 $echoLog "[+verbose] Running Locate on nmap/scripts" 
-	         locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
+                 $echoLog "[+verbose] Running Locate on nmap/scripts"
+                 loc
                  echo "[*] End"
             fi
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
-            if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
-                 mkdir ~/Desktop/$host-SMBScan
-                 mkdir ~/Desktop/$host-SMBScan/NSE
-            fi
-            if [ "$1" == "-n" ]; then
-                 echo "[*] Error, must specify a target"
-            exit 0
-            else
-                 $echoLog "[+verbose] Running Scans" 
-                 nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
-            wait 
-            fi ;;
+            direxist
+            checkarg $1 -n "Error, must specify a target"
+            $echoLog "[+verbose] Running Scans" 
+            nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
+            wait ;;
         -map) echo "[*] Mapping Shares with SMBMap"
-            if [ "$1" == "-map" ]; then
-                 echo "[*] Error, must specifiy a host to map"
-                 echo "[*] Ex: wsmb 192.168.1.25 -map" 
-                 exit 0
-            else
-                 smbmap -H $1
-            fi
+            checkarg $1 -map "Error, must specify a target Ex: wsmb 192.168.1.25 -map"
+            smbmap -H $1
             exit 0;;
         -e) echo "[*] Running Enum4Linux Against Target - This could take a while."
-            if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
-                 mkdir ~/Desktop/$host-SMBScan
-                 mkdir ~/Desktop/$host-SMBScan/NSE
-            fi
-            if [ "$1" == "-e" ]; then
-                 echo "[*] Error, must specify a target"
-                 exit 0
-            else
-                 enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
-                 wait
-                 grep -i os= ~/Desktop/$host-SMBScan/enum4linux.txt 
-            fi ;;
-        -c) if [ "$1" == "-c" ]; then
-                 echo "[*] Error, must specifiy which directory to clear with target name"
-                 echo "[*] Ex: wsmb 192.168.1.25 -c" 
-                 exit 0
-            fi
-            if [ -d ~/Desktop/$host-SMBScan ]; then
-                 echo "[*] Cleaning Directory"
-                 rm -rf ~/Desktop/$host-SMBScan/NSE/* &
-            else
-                 echo "[*] Directory Does Not Exist!"
-            fi;;
-        -cx)if [ "$1" == "-cx" ]; then
-                 echo "[*] Error, must specifiy which directory to clear with target name"
-                 echo "[*] Ex: wsmb 192.168.1.25 -cx" 
-                 exit 0
-            fi
-            if [ -d ~/Desktop/$host-SMBScan ]; then
-                 echo "[*] Cleaning Directory"
-                 rm -rf ~/Desktop/$host-SMBScan/NSE/* &
-            else
-                 echo "[*] Directory Does Not Exist!"
-            fi
-            exit 0;;
+            direxist
+            checkarg $1 -e "Error, must specify a target"
+            enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
+            wait
+            grep -i os= ~/Desktop/$host-SMBScan/enum4linux.txt ;;
+        -c) echo "[/*\]";;
         -sb) echo "[*] Checking for All SMB Servers in subnet with banner grabbing (slower scan):"
-            if [ "$1" == "-sb" ]; then
-                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
-                 echo "[*] Ex: wsmb 192.168.25.1 -sb"
-            else
+            checkarg $1 -sb "Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target Ex: wsmb 192.168.25.1 -sb"
             echo "[*]Open SMB Servers" > ~/Desktop/SMBScan.txt
-                 for a in $(seq 0 254); do
-                      b=$(echo $1 | cut -d"." -f1,2,3)
-                      c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
-                      if [ -z "$c" ]; then
+            for a in $(seq 0 254); do
+                 b=$(echo $1 | cut -d"." -f1,2,3)
+                 c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
+                 $echoLog "[*] Scanning $b.$a"
+                 if [ -z "$c" ]; then
                            :
-                      else
-                           d=$(nmap -p139,445 -sV $b.$a --open | grep "139/tcp" | cut -d' ' -f5,6 )
-                           e=$(host $c | cut -d" " -f5)
-                           echo "$c $e [+$d]" >> ~/Desktop/SMBScan.txt
-                           echo "$c $e [+$d]"
-                      fi
-                 done
+                 else
+                      d=$(nmap -p139,445 -sV $b.$a --open | grep "139/tcp" | cut -d' ' -f5,6 )
+                      e=$(host $c | cut -d" " -f5)
+                      echo "$c $e [+$d]" >> ~/Desktop/SMBScan.txt
+                      echo "$c $e [+$d]"
+                 fi
+            done
             echo "[*]End" >> ~/Desktop/SMBScan.txt
-            fi
             exit 0;;
         -s) echo "[*] Checking for All SMB Servers in subnet:"
-            if [ "$1" == "-s" ]; then
-                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
-                 echo "[*] Ex: wsmb 192.168.25.1 -s"
-            else
-                 echo "[*]Open SMB Servers" > ~/Desktop/SMBScan.txt
-                 for a in $(seq 0 254); do
-                      b=$(echo $1 | cut -d"." -f1,2,3)
-                      c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
-                      if [ -z "$c" ]; then
-                           :
-                      else
-                           d=$(host $c | cut -d" " -f5)
-                           echo "$c $d" >> ~/Desktop/SMBScan.txt
-                           echo "$c $d"
-                      fi
-                 done
+            checkarg $1 -s "Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target Ex: wsmb 192.168.25.1 -s"
+            echo "[*]Open SMB Servers" > ~/Desktop/SMBScan.txt
+            for a in $(seq 0 254); do
+                 b=$(echo $1 | cut -d"." -f1,2,3)
+                 c=$(nmap -p139,445 $b.$a --open | grep "for" | cut -d" " -f5,6)
+                 $echoLog "[*] Scanning $b.$a"
+                 if [ -z "$c" ]; then
+                      :
+                 else
+                      d=$(host $c | cut -d" " -f5)
+                      echo "$c $d" >> ~/Desktop/SMBScan.txt
+                      echo "$c $d"
+                 fi
+            done
             echo "[*]End" >> ~/Desktop/SMBScan.txt
-            fi
             exit 0;;
         -qs) echo "[*] Checking for SMB Servers:"
-            if [ "$1" == "-qs" ]; then
-                 echo "[*] Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target."
-                 echo "[*] Ex: wsmb 192.168.25.* -qs"
-                 echo "[*] EX: wsmb 192.168.25.1 -qs"
-            else
-                 a=$(echo $1 | cut -d"." -f4 | cut -d"/" -f1)
-                 if [[ "$a" != "*" ]] && [[ "$a" != "0" ]]; then
-                      smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
-                      echo "$smb [+OPEN]" 
-                 else 
-                      smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
-                      echo "$smb"
-                      echo "[*]Scan Finished"
-                 fi
+            checkarg $1 -qs "Error! Must be used with a target IP, Scanner will search for ALL IPS in subnet range of target Ex: wsmb 192.168.25.* -qs" 
+            a=$(echo $1 | cut -d"." -f4 | cut -d"/" -f1)
+            if [[ "$a" != "*" ]] && [[ "$a" != "0" ]]; then
+                 smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
+                 echo "$smb [+OPEN]" 
+            else 
+                 smb=$(nmap -p139,445 $1 --open | grep "for" | cut -d" " -f5,6)
+                 echo "$smb"
+                 echo "[*]Scan Finished"
             fi
             exit 0;;
         -sh) echo "[*] Listing SMB Shares"
-            if [ "$1" == "-sh" ]; then
-                 echo "[*] Error!  Must be used with a target host or IP!"
-                 echo "[*] List and enter SMB Shares"
-                 echo "[*] Usage: wsmb <host> -sh"
+            checkarg $1 -sh "Error!  Must be used with a target host or IP! Usage: wsmb <host> -sh"
+            $echoLog "[+verbose] Running SMBClient to check shares." 
+            smbclient -L $1
+            read -p "[*] Would you like to access smb share? (Y/n): " answer;
+            if [ "$answer" == y ] || [ "$answer" == Y ] || [ -z "$answer" ]; then
+                  read -p "[*] Choose an SMB share to access: " smb;
+                  read -p "[*] Choose a user to login with (leave blank for anon): " user;
+                  read -p "[*] Enter user password (leave blank for anon): " pass;
+                  smbclient //"$1"/"$smb" -U "$user"%"$pass"
             else
-                 $echoLog "[+verbose] Running SMBClient to check shares." 
-                 smbclient -L $1
-                 read -p "[*] Would you like to access smb share? (Y/n): " answer;
-                      if [ "$answer" == y ] || [ "$answer" == Y ] || [ -z "$answer" ]; then
-                           read -p "[*] Choose an SMB share to access: " smb;
-                           read -p "[*] Choose a user to login with (leave blank for anon): " user;
-                           read -p "[*] Enter user password (leave blank for anon): " pass;
-                           smbclient //"$1"/"$smb" -U "$user"%"$pass"
-                      else
-                      exit 0
-                      fi
+                  exit 
             fi
             exit 0;;
         -brute) echo "[*] Running SMB Brute Force Attack"
-            if [ "$1" == "-brute" ]; then
-                 echo "[*] Error!  Must specify a target"
-                 echo "[*] EX: wsmb 192.168.5.5 -brute"
-            else
-                 $echoLog "[+verbose] Checking to see if directory exists for creation."
-                 if [ ! -d ~/Desktop/$host-SMBScan ]; then
-                      mkdir ~/Desktop/$host-SMBScan
-                 fi
-                 read -p "[->] Enter a user to brute force or a .txt file: " $BRUTEUSER;
-                 read -p "[->] Enter a password to brute force with or a .txt file: " $BRUTEPASS;
-                 CHECK1=$(echo $BRUTEUSER | cut -d'.' -f2)
-                 CHECK2=$(echo $BRUTEPASS | cut -d'.' -f2)
-                 $echoLog "[+verbose] Checking to see if any files are .txt or not for brute forcing" 
-                 if [ "$CHECK1" == "txt" ]; then
-                      u="U"
-                 elif [ "$CHECK1" != "txt" ]; then
-                      u="u"
-                 elif [ "$CHECK2" == "txt" ]; then
-                      p="P"
-                 elif [ "$CHECK2" != "txt" ]; then
-                      p="p"
-                 fi
-                 $echoLog "[+verbose] Running acccheck."
-                 acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER
-                 read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
-                 if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
-                      gnome-screenshot --window -f ~/Desktop/$host-SMBScan/smbbrute.jpg
-                 fi
+            direxist
+            checkarg $1 -brute "Error!  Must specify a target EX: wsmb 192.168.5.5 -brute"   
+            $echoLog "[+verbose] Checking to see if directory exists for creation."
+            read -p "[->] Enter a user to brute force or a .txt file: " BRUTEUSER;
+            read -p "[->] Enter a password to brute force with or a .txt file: " BRUTEPASS;
+            CHECK1=$(echo $BRUTEUSER | cut -d'.' -f2)
+            CHECK2=$(echo $BRUTEPASS | cut -d'.' -f2)
+            $echoLog "[+verbose] Checking to see if any files are .txt or not for brute forcing" 
+            if [ "$CHECK1" == "txt" ]; then
+                 u="U"
+            elif [ "$CHECK1" != "txt" ]; then
+                 u="u"
+            elif [ "$CHECK2" == "txt" ]; then
+                 p="P"
+            elif [ "$CHECK2" != "txt" ]; then
+                 p="p"
             fi
+            $echoLog "[+verbose] Running acccheck using creds user:$BRUTEUSER pass:$BRUTEPASS"
+            acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER
+            snapshot "smbbrute"
             exit 0;;
         --update) echo "[*] wsmb Version $VERSION"
             echo "[*] Updating WSMB"
@@ -356,20 +338,13 @@ for arg; do
     esac
 done
 
-$echoLog "[+verbose] Checking to see if directory exists for creation."
-#And here we do a check to see if the directory this script makes already exists.
-if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
-     $echoLog "[+verbose] Creating Main Directory"
-     mkdir ~/Desktop/$host-SMBScan
-     $echoLog "[+verbose] Creating NSE Sub-Directory"
-     mkdir ~/Desktop/$host-SMBScan/NSE
-fi
+direxist
 
 $echoLog "[+verbose] Running NMap NSE Scripts against target [<-]"
 #Finally, we take the IP here and run it against every SMB NSE Vuln script found on your host machine and output it into a file in our folder and grep to see if we found a vuln
-for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
+for a in $(loc); do
      nmap -p139,445 -script $a $1 --open > ~/Desktop/$host-SMBScan/NSE/$a.txt &
-     echo "[*] Running $a"
+     $echoLog "[*] Running $a"
      wait
      if grep -q "VULNERABLE" ~/Desktop/$host-SMBScan/NSE/$a.txt; then
           echo "[!!] $1 Seems Vulnerable to $a!"
