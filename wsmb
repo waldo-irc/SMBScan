@@ -19,18 +19,35 @@ echo "-sb                           Run a full subnet SMB Scan with Banner Grabb
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
 echo "-brute                        Brute force SMB"
+echo "-v                            Verbose output"
 echo "--update                      Updates WSMB"
 exit 0
 fi
 
-#update Locate DB
-updatedb
-
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.51
+VERSION=1.0.6
+
+# Use `$echoLog` everywhere you print verbose logging messages to console
+# By default, it is disabled and will be enabled with the `-v` or `--verbose` flags
+declare echoLog='silentEcho'
+function silentEcho() {
+    :
+}
+
+#start verbose, this way it runs as first argument.
+for arg; do
+    case $arg in
+      -v) echoLog='echo'; ;;
+    esac
+done
+
+#update Locate DB
+$echoLog "[+verbose] Running updatedb." 
+updatedb
 
 #checks for updates and notifies if available
+$echoLog "[+verbose] Checking github for version updates." 
 git=$(curl --silent https://github.com/waldo-irc/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
 if [ "$git" == "$VERSION" ]; then
      :
@@ -40,16 +57,8 @@ elif [ "$1" != "--update" ]; then
      echo "[****] Read Changelog for more info. https://github.com/waldo-irc/SMBScan/blob/master/README.md"
 fi
 
-#checks for first time run in order to update Locate DB
-#if grep -q "WUPDATE=1" ~/.bashrc; then
-#     :
-#else
-#     echo "[*] Updating Database"
-#     updatedb     
-#     echo "WUPDATE=1" >> ~/.bashrc
-#fi
-
 #store our final octet for final naming into $host
+$echoLog "[+verbose] Grepping Host for foldername creation." 
 if [[ $1 == *[/]* ]]; then
      hostl=$(echo $1 | cut -d"." -f4 | cut -d"/" -f2)
      host="sub$hostl"
@@ -62,28 +71,13 @@ fi
 #Here we set up our options and arguments
 for arg; do
     case $arg in
-        -h) echo "[*] SMB Nmap NSE Scanner"
-            echo "[*] Runs all available SMB NSE Scripts gainst victim target"
-            echo "[*] Usage: wsmb <domain name> -options"
-            echo "options:"
-            echo "-h, --help                    show brief help"
-            echo "-l                            list SMB NSE Scripts"
-            echo "-n                            Include NBTScan"
-            echo "-e                            Include Enum4Linux Scan"
-            echo "-map                          Enumerate with smbmap"
-            echo "-sh                           List and login to an SMB Share"
-            echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
-            echo "-qs                           Run a quick SMB Scan"
-            echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
-            echo "-c                            Run scan and empty directory"
-            echo "-cx                           Empty dir without scan"
-            echo "-brute                        Brute force SMB"
-            echo "--update                      Updates WSMB"
-            exit 0;;
+        -v) echo "[/*\]"
+            $echoLog "[+verbose] Running in Verbose Mode" ;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
             if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
                  echo "[*] Error, -l must be only argument"
             else
+                 $echoLog "[+verbose] Running Locate on nmap/scripts" 
 	         locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r 
                  echo "[*] End"
             fi
@@ -97,6 +91,7 @@ for arg; do
                  echo "[*] Error, must specify a target"
             exit 0
             else
+                 $echoLog "[+verbose] Running Scans" 
                  nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             wait 
             fi ;;
@@ -209,6 +204,7 @@ for arg; do
                  echo "[*] List and enter SMB Shares"
                  echo "[*] Usage: wsmb <host> -sh"
             else
+                 $echoLog "[+verbose] Running SMBClient to check shares." 
                  smbclient -L $1
                  read -p "[*] Would you like to access smb share? (Y/n): " answer;
                       if [ "$answer" == y ] || [ "$answer" == Y ] || [ -z "$answer" ]; then
@@ -226,13 +222,15 @@ for arg; do
                  echo "[*] Error!  Must specify a target"
                  echo "[*] EX: wsmb 192.168.5.5 -brute"
             else
+                 $echoLog "[+verbose] Checking to see if directory exists for creation."
                  if [ ! -d ~/Desktop/$host-SMBScan ]; then
                       mkdir ~/Desktop/$host-SMBScan
                  fi
                  read -p "[->] Enter a user to brute force or a .txt file: " $BRUTEUSER;
                  read -p "[->] Enter a password to brute force with or a .txt file: " $BRUTEPASS;
                  CHECK1=$(echo $BRUTEUSER | cut -d'.' -f2)
-                 CHECK2=$(echo $BRUTEPASS | cut -d'.' -f2) 
+                 CHECK2=$(echo $BRUTEPASS | cut -d'.' -f2)
+                 $echoLog "[+verbose] Checking to see if any files are .txt or not for brute forcing" 
                  if [ "$CHECK1" == "txt" ]; then
                       u="U"
                  elif [ "$CHECK1" != "txt" ]; then
@@ -242,6 +240,7 @@ for arg; do
                  elif [ "$CHECK2" != "txt" ]; then
                       p="p"
                  fi
+                 $echoLog "[+verbose] Running acccheck."
                  acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER
                  read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
                  if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
@@ -289,18 +288,23 @@ for arg; do
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
             echo "-brute                        Brute force SMB"
+            echo "-v                            Verbose output"
             echo "--update                      Updates WSMB"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
     esac
 done
 
+$echoLog "[+verbose] Checking to see if directory exists for creation."
 #And here we do a check to see if the directory this script makes already exists.
 if [ ! -d ~/Desktop/$host-SMBScan/NSE ]; then
+     $echoLog "[+verbose] Creating Main Directory"
      mkdir ~/Desktop/$host-SMBScan
+     $echoLog "[+verbose] Creating NSE Sub-Directory"
      mkdir ~/Desktop/$host-SMBScan/NSE
 fi
 
+$echoLog "[+verbose] Running NMap NSE Scripts against target [<-]"
 #Finally, we take the IP here and run it against every SMB NSE Vuln script found on your host machine and output it into a file in our folder and grep to see if we found a vuln
 for a in $(locate nmap/scripts/smb | cut -d"/" -f6 | grep "vuln" | cut -d"." -f1 | sort -r); do
      nmap -p139,445 -script $a $1 --open > ~/Desktop/$host-SMBScan/NSE/$a.txt &
