@@ -1,11 +1,5 @@
 # SMBScan - Current Version 1.0.62
 
-.▄▄ · • ▌ ▄ ·. ▄▄▄▄·           
-▐█ ▀. ·██ ▐███▪▐█ ▀█▪          
-▄▀▀▀█▄▐█ ▌▐▌▐█·▐█▀▀█▄          
-▐█▄▪▐███ ██▌▐█▌██▄▪▐█          
- ▀▀▀▀ ▀▀  █▪▀▀▀·▀▀▀▀  
-
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
