@@ -28,7 +28,7 @@ updatedb
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.5
+VERSION=1.0.51
 
 #checks for updates and notifies if available
 git=$(curl --silent https://github.com/waldo-irc/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
@@ -242,8 +242,11 @@ for arg; do
                  elif [ "$CHECK2" != "txt" ]; then
                       p="p"
                  fi
-                 acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER -v >> ~/Desktop/$host-SMBScan/smbbrute.txt
-                 cat ~/Desktop/$host-SMBScan/smbbrute.txt
+                 acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER
+                 read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
+                 if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
+                      gnome-screenshot --window -f ~/Desktop/$host-enum/smbbrute.jpg
+                 fi
             fi
             exit 0;;
         --update) echo "[*] wsmb Version $VERSION"
