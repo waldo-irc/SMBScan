@@ -245,7 +245,7 @@ for arg; do
                  acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER
                  read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
                  if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
-                      gnome-screenshot --window -f ~/Desktop/$host-enum/smbbrute.jpg
+                      gnome-screenshot --window -f ~/Desktop/$host-SMBScan/smbbrute.jpg
                  fi
             fi
             exit 0;;
