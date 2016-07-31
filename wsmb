@@ -18,6 +18,7 @@ echo "-qs                           Run a quick SMB Scan"
 echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
+echo "-brute                        Brute force SMB"
 echo "--update                      Updates WSMB"
 exit 0
 fi
@@ -27,7 +28,7 @@ updatedb
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.4
+VERSION=1.0.5
 
 #checks for updates and notifies if available
 git=$(curl --silent https://github.com/waldo-irc/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
@@ -76,6 +77,7 @@ for arg; do
             echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
+            echo "-brute                        Brute force SMB"
             echo "--update                      Updates WSMB"
             exit 0;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
@@ -219,9 +221,31 @@ for arg; do
                       fi
             fi
             exit 0;;
-        #-brute) smbclient //"$1"/"$smb" -U "$user"%"$pass" 
-         #   exit 0;;
-         #add samba brute force
+        -brute) echo "[*] Running SMB Brute Force Attack"
+            if [ "$1" == "-brute" ]; then
+                 echo "[*] Error!  Must specify a target"
+                 echo "[*] EX: wsmb 192.168.5.5 -brute"
+            else
+                 if [ ! -d ~/Desktop/$host-SMBScan ]; then
+                      mkdir ~/Desktop/$host-SMBScan
+                 fi
+                 read -p "[->] Enter a user to brute force or a .txt file: " $BRUTEUSER;
+                 read -p "[->] Enter a password to brute force with or a .txt file: " $BRUTEPASS;
+                 CHECK1=$(echo $BRUTEUSER | cut -d'.' -f2)
+                 CHECK2=$(echo $BRUTEPASS | cut -d'.' -f2) 
+                 if [ "$CHECK1" == "txt" ]; then
+                      u="U"
+                 elif [ "$CHECK1" != "txt" ]; then
+                      u="u"
+                 elif [ "$CHECK2" == "txt" ]; then
+                      p="P"
+                 elif [ "$CHECK2" != "txt" ]; then
+                      p="p"
+                 fi
+                 acccheck -t $1 -$p $BRUTEPASS -$u $BRUTEUSER -v >> ~/Desktop/$host-SMBScan/smbbrute.txt
+                 cat ~/Desktop/$host-SMBScan/smbbrute.txt
+            fi
+            exit 0;;
         --update) echo "[*] wsmb Version $VERSION"
             echo "[*] Updating WSMB"
             if [ "$1" != "--update" ]; then
@@ -261,6 +285,7 @@ for arg; do
             echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
+            echo "-brute                        Brute force SMB"
             echo "--update                      Updates WSMB"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
