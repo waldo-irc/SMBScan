@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 # SMBScan - Current Version 2.0.0
-=======
-# SMBScan - Current Version 1.0.62
+
 <pre>
  __      __        .__       .___         _________   _____ __________ 
 /  \    /  \_____  |  |    __| _/____    /   _____/  /     \\______   \
@@ -10,7 +8,7 @@
   \__/\  /  (____  /____/\____ |\____/  /_______  /\____|__  /______  /
        \/        \/           \/                \/         \/       \/ 
 </pre>
->>>>>>> ee3ea57cdf20611a78cfa368af65e1f2d7589f1e
+
 Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
@@ -85,7 +83,6 @@ Several more features to come so a --update feature was added to automatically u
 #Changelog
 ** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
 
-<<<<<<< HEAD
 *2.0.0
 <ul>
 <li> Complete restructure with functions to handle bulkwork. Further optimization planned to come.</li>
@@ -93,8 +90,6 @@ Several more features to come so a --update feature was added to automatically u
 <li> Minor bug fixes including SMB Brute force fix</li>
 </ul>
 
-=======
->>>>>>> ee3ea57cdf20611a78cfa368af65e1f2d7589f1e
 *1.0.62
 <ul>
 <li> New ASCII intro.</li>
