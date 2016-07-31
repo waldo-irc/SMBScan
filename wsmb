@@ -1,6 +1,66 @@
 #!/bin/bash
 #Nmap Full Vuln Scan
 
+Rand=$(( ( RANDOM % 3 )  + 1 ))
+if [ "$Rand" == "1" ]; then
+cat << "EndOfMessage"
+ █     █░ ▄▄▄       ██▓    ▓█████▄  ▒█████  
+▓█░ █ ░█░▒████▄    ▓██▒    ▒██▀ ██▌▒██▒  ██▒
+▒█░ █ ░█ ▒██  ▀█▄  ▒██░    ░██   █▌▒██░  ██▒
+░█░ █ ░█ ░██▄▄▄▄██ ▒██░    ░▓█▄   ▌▒██   ██░
+░░██▒██▓  ▓█   ▓██▒░██████▒░▒████▓ ░ ████▓▒░
+░ ▓░▒ ▒   ▒▒   ▓▒█░░ ▒░▓  ░ ▒▒▓  ▒ ░ ▒░▒░▒░ 
+  ▒ ░ ░    ▒   ▒▒ ░░ ░ ▒  ░ ░ ▒  ▒   ░ ▒ ▒░ 
+  ░   ░    ░   ▒     ░ ░    ░ ░  ░ ░ ░ ░ ▒  
+    ░          ░  ░    ░  ░   ░        ░ ░  
+  ██████  ███▄ ▄███▓ ▄▄▄▄   ░               
+▒██    ▒ ▓██▒▀█▀ ██▒▓█████▄                 
+░ ▓██▄   ▓██    ▓██░▒██▒ ▄██                
+  ▒   ██▒▒██    ▒██ ▒██░█▀                  
+▒██████▒▒▒██▒   ░██▒░▓█  ▀█▓                
+▒ ▒▓▒ ▒ ░░ ▒░   ░  ░░▒▓███▀▒                
+░ ░▒  ░ ░░  ░      ░▒░▒   ░                 
+░  ░  ░  ░      ░    ░    ░                 
+      ░         ░    ░                      
+                          ░                 
+
+[*] Running wsmb!                                                                                                      
+EndOfMessage
+elif [ "$Rand" == "2" ]; then
+cat << "EndOfMessage"
+██╗    ██╗ █████╗ ██╗     ██████╗  ██████╗ 
+██║    ██║██╔══██╗██║     ██╔══██╗██╔═══██╗
+██║ █╗ ██║███████║██║     ██║  ██║██║   ██║
+██║███╗██║██╔══██║██║     ██║  ██║██║   ██║
+╚███╔███╔╝██║  ██║███████╗██████╔╝╚██████╔╝
+ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚═════╝  ╚═════╝ 
+███████╗███╗   ███╗██████╗                 
+██╔════╝████╗ ████║██╔══██╗                
+███████╗██╔████╔██║██████╔╝                
+╚════██║██║╚██╔╝██║██╔══██╗                
+███████║██║ ╚═╝ ██║██████╔╝                
+╚══════╝╚═╝     ╚═╝╚═════╝     
+                                                                                         
+[*] Running wsmb!                                                       
+EndOfMessage
+elif [ "$Rand" == "3" ]; then
+cat << "EndOfMessage"
+▄▄▌ ▐ ▄▌ ▄▄▄· ▄▄▌  ·▄▄▄▄       
+██· █▌▐█▐█ ▀█ ██•  ██▪ ██▪     
+██▪▐█▐▐▌▄█▀▀█ ██▪  ▐█· ▐█▌▄█▀▄ 
+▐█▌██▐█▌▐█ ▪▐▌▐█▌▐▌██. ██▐█▌.▐▌
+ ▀▀▀▀ ▀▪ ▀  ▀ .▀▀▀ ▀▀▀▀▀• ▀█▄▀▪
+.▄▄ · • ▌ ▄ ·. ▄▄▄▄·           
+▐█ ▀. ·██ ▐███▪▐█ ▀█▪          
+▄▀▀▀█▄▐█ ▌▐▌▐█·▐█▀▀█▄          
+▐█▄▪▐███ ██▌▐█▌██▄▪▐█          
+ ▀▀▀▀ ▀▀  █▪▀▀▀·▀▀▀▀                                                                                
+
+[*] Running wsmb!       
+EndOfMessage
+fi
+
+
 #First part checks to make sure we have a host or any variable given.  If not, help options are displayed
 if [ -z "$1" ]; then
 echo "[*] SMB Nmap NSE Scanner"
@@ -26,7 +86,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=1.0.61
+VERSION=1.0.62
 
 # Use `$echoLog` everywhere you print verbose logging messages to console
 # By default, it is disabled and will be enabled with the `-v` or `--verbose` flags
