@@ -1,4 +1,4 @@
-# SMBScan - Current Version 2.0.0
+# SMBScan - Current Version 2.0.1
 
 <pre>
  __      __        .__       .___         _________   _____ __________ 
@@ -82,6 +82,11 @@ Several more features to come so a --update feature was added to automatically u
 
 #Changelog
 ** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+
+*2.0.1
+<ul>
+<li> Enhanced SMB Share login to accept a Share as an argument for an expedited login.  EX: wsmb 192.168.1.1 -sh="Admin"</li>
+</ul>
 
 *2.0.0
 <ul>
