@@ -177,7 +177,7 @@ else
 fi
 
 #Here we set up our options and arguments
-for arg; do
+for arg in "$@"; do
     case $arg in
         -v) echo "[/*\]"
             $echoLog "[+verbose] Running in Verbose Mode" ;;
@@ -254,19 +254,29 @@ for arg; do
                  echo "[*]Scan Finished"
             fi
             exit 0;;
-        -sh) echo "[*] Listing SMB Shares"
+        -sh=*|-sh) echo "[*] Listing SMB Shares"
             checkarg $1 -sh "Error!  Must be used with a target host or IP! Usage: wsmb <host> -sh"
             $echoLog "[+verbose] Running SMBClient to check shares." 
             smbclient -L $1
-            read -p "[*] Would you like to access smb share? (Y/n): " answer;
+            SHARE="${arg#*=}"
+            if [ -z "$SHARE" ] || [ "$SHARE" == "-sh" ]; then
+                 read -p "[*] Would you like to access smb share? (Y/n): " answer;
+            else 
+                 answer=Y
+            fi
             if [ "$answer" == y ] || [ "$answer" == Y ] || [ -z "$answer" ]; then
-                  read -p "[*] Choose an SMB share to access: " smb;
-                  read -p "[*] Choose a user to login with (leave blank for anon): " user;
-                  read -p "[*] Enter user password (leave blank for anon): " pass;
-                  smbclient //"$1"/"$smb" -U "$user"%"$pass"
+                  if [ -z "$SHARE" ] || [ "$SHARE" == "-sh" ]; then
+                       read -p "[*] Choose an SMB share to access: " smb;
+                  else
+                       smb="$SHARE"
+                  fi
+                       read -p "[*] Choose a user to login with (leave blank for anon): " user;
+                       read -p "[*] Enter user password (leave blank for anon): " pass;
+                       smbclient //"$1"/"$smb" -U "$user"%"$pass"
             else
                   exit 
             fi
+            shift
             exit 0;;
         -brute) echo "[*] Running SMB Brute Force Attack"
             direxist
