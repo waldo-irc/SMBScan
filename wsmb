@@ -61,6 +61,7 @@ EndOfMessage
 fi
 
 
+
 #First part checks to make sure we have a host or any variable given.  If not, help options are displayed
 if [ -z "$1" ]; then
 echo "[*] SMB Nmap NSE Scanner"
