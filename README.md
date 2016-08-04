@@ -1,4 +1,4 @@
-# SMBScan - Current Version 2.0.1
+# SMBScan - Current Version 2.0.2
 
 <pre>
  __      __        .__       .___         _________   _____ __________ 
@@ -82,6 +82,11 @@ Several more features to come so a --update feature was added to automatically u
 
 #Changelog
 ** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+
+*2.0.2
+<ul>
+<li> Fixed help Menu</li>
+</ul>
 
 *2.0.1
 <ul>

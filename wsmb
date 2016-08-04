@@ -72,7 +72,7 @@ echo "-l                            List SMB NSE Scripts"
 echo "-n                            Include NBTScan"
 echo "-e                            Include Enum4Linux Scan"
 echo "-map                          Enumerate with smbmap"
-echo "-sh                           List and login to an SMB Share"
+echo "-sh or -sh='Share'             List and login to an SMB Share"
 echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
 echo "-qs                           Run a quick SMB Scan"
 echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
@@ -86,7 +86,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=2.0.1
+VERSION=2.0.2
 
 #Setting up functions[*]
 # Use `$echoLog` everywhere you print verbose logging messages to console
@@ -334,7 +334,7 @@ for arg in "$@"; do
             echo "-n                            Include NBTScan"
             echo "-e                            Include Enum4Linux Scan"
             echo "-map                          Enumerate with smbmap"
-            echo "-sh                           List and login to an SMB Share"
+            echo "-sh or -sh='Share'            List and login to an SMB Share"
             echo "-s                            Run a full subnet SMB Scan without Banner Grabbing"
             echo "-qs                           Run a quick SMB Scan"
             echo "-sb                           Run a full subnet SMB Scan with Banner Grabbing (slow scan)"
