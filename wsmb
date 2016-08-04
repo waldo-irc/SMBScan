@@ -86,7 +86,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=2.0.2
+VERSION=2.0.3
 
 #Setting up functions[*]
 # Use `$echoLog` everywhere you print verbose logging messages to console
@@ -257,9 +257,9 @@ for arg in "$@"; do
         -sh=*|-sh) echo "[*] Listing SMB Shares"
             checkarg $1 -sh "Error!  Must be used with a target host or IP! Usage: wsmb <host> -sh"
             $echoLog "[+verbose] Running SMBClient to check shares." 
-            smbclient -L $1
             SHARE="${arg#*=}"
             if [ -z "$SHARE" ] || [ "$SHARE" == "-sh" ]; then
+                 smbclient -L $1
                  read -p "[*] Would you like to access smb share? (Y/n): " answer;
             else 
                  answer=Y
