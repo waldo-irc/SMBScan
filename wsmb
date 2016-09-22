@@ -83,13 +83,13 @@ echo "-brute                        Brute force SMB"
 echo "-i                            Do a full intensive scan of SMB on the machine"
 echo "-v                            Verbose output"
 echo "--update                      Updates WSMB"
-echo "--version                     Displays current wsmb Version"
+echo "--version                     Displays current wsmb Version and checks for updates"
 exit 0
 fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=3.0.1
+VERSION=3.0.2
 
 ###########################
 ####Setting up functions[*]
@@ -133,12 +133,15 @@ if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
 fi
 }
 
-existchecks () {
-$echoLog "[+verbose] Checking if $2 installed."
+dependencychecks () {
+$echoLog "[+verbose] Checking if $2 is installed."
 if [ ! -f "$1" ]; then
-     read -p "<$2 Not installed, required for full functionality.  Install now?>  Y/n: " CONDITION;
+     read -p "< [$2] Not installed, required for full functionality.  Install now?>  Y/n: " CONDITION;
      if [ "$CONDITION" == "Y" ] || [ "$CONDITION" == "y" ] || [ -z "$CONDITION" ]; then
           sudo apt-get install "$2" -y
+     else 
+          echo "[*] Must install $2 to continue."
+          exit 0
      fi 
 fi
 }
@@ -192,7 +195,7 @@ for arg; do
     case $arg in
       -l) checkonlyarg "$1" "-l" "Error, -l must be the only argument" "$2" ;;
       -i) checkonlyarg "$2" "-i" "Error, -i cannot be run with anything else." "$3" ;;
-      -i) checkonlyarg "$1" "--update" "Error, --update cannot be run with anything else." "$2" ;;
+      --update) checkonlyarg "$1" "--update" "Error, --update cannot be run with anything else." "$2" ;;
     esac
 done
 
@@ -218,13 +221,8 @@ done
 $echoLog "[+verbose] Running updatedb." 
 updatedb
 
-#checking for dependencies
-existchecks /usr/bin/enum4linux enum4linux
-existchecks /usr/bin/smbmap smbmap
-existchecks /usr/bin/nbtscan nbtscan
-existchecks /usr/bin/smbclient smbclient
-existchecks /usr/bin/nmap nmap
-existchecks /usr/bin/acccheck acccheck
+#checking for dependencies.  There are lines like these at the beggining of any argument that requires such a dependency.
+dependencychecks /usr/bin/nmap nmap
 
 #Here we set up our options and arguments
 for arg in "$@"; do
@@ -232,12 +230,16 @@ for arg in "$@"; do
         -v) echo "[/*\]"
             $echoLog "[+verbose] Running in Verbose Mode" ;;
         -i) echo "[*] Running Intensive Scan Against Target"
+            dependencychecks /usr/bin/enum4linux enum4linux
+            dependencychecks /usr/bin/nbtscan nbtscan
+            dependencychecks /usr/bin/smbclient smbclient
             direxist
             checkarg $1 -i "Error, must specify a target"
             $echoLog "[+verbose] Running NBTScan"
             nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             $echoLog "[+verbose] Enumerating Shares"
             smbclient -L $1 -N > ~/Desktop/$host-SMBScan/shares.txt 
+            grep -i "disk" ~/Desktop/$host-SMBScan/shares.txt
             wait 
             $echoLog "[+verbose] Running Enum4Linux (this scan takes the longest)"
             enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
@@ -250,16 +252,19 @@ for arg in "$@"; do
             echo "[*] End"
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
+            dependencychecks /usr/bin/nbtscan nbtscan
             direxist
             checkarg $1 -n "Error, must specify a target"
             $echoLog "[+verbose] Running NBTScans" 
             nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             wait ;;
         -map) echo "[*] Mapping Shares with SMBMap"
+            dependencychecks /usr/bin/smbmap smbmap
             checkarg $1 -map "Error, must specify a target Ex: wsmb 192.168.1.25 -map"
             smbmap -H $1
             exit 0;;
         -e) echo "[*] Running Enum4Linux Against Target - This could take a while."
+            dependencychecks /usr/bin/enum4linux enum4linux
             direxist
             checkarg $1 -e "Error, must specify a target"
             enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
@@ -314,6 +319,7 @@ for arg in "$@"; do
             fi
             exit 0;;
         -sh=*|-sh) echo "[*] Listing SMB Shares"
+            dependencychecks /usr/bin/smbclient smbclient
             checkarg $1 -sh "Error!  Must be used with a target host or IP! Usage: wsmb <host> -sh"
             $echoLog "[+verbose] Running SMBClient to check shares." 
             SHARE="${arg#*=}"
@@ -338,6 +344,7 @@ for arg in "$@"; do
             shift
             exit 0;;
         -brute) echo "[*] Running SMB Brute Force Attack"
+            dependencychecks /usr/bin/acccheck acccheck
             direxist
             checkarg $1 -brute "Error!  Must specify a target EX: wsmb 192.168.5.5 -brute"   
             $echoLog "[+verbose] Checking to see if directory exists for creation."
@@ -408,7 +415,7 @@ for arg in "$@"; do
             echo "-i                            Do a full intensive scan of SMB on the machine"
             echo "-v                            Verbose output"
             echo "--update                      Updates WSMB"
-            echo "--version                     Displays current wsmb Version"
+            echo "--version                     Displays current wsmb Version and checks for updates"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
     esac
