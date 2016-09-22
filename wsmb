@@ -238,6 +238,7 @@ for arg in "$@"; do
             nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             $echoLog "[+verbose] Enumerating Shares"
             smbclient -L $1 -N > ~/Desktop/$host-SMBScan/shares.txt 
+            grep -i "disk" ~/Desktop/$host-SMBScan/shares.txt
             wait 
             $echoLog "[+verbose] Running Enum4Linux (this scan takes the longest)"
             enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
