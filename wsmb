@@ -181,7 +181,7 @@ if [[ $1 == *[/]* ]]; then
      host="sub$hostl"
 elif echo "$1" | grep '[0-9]' >/dev/null; then
      host=$(echo $1 | cut -d"." -f4)
-elif echo "$1" | grep '*' >/dev/null;
+elif echo "$1" | grep '*' >/dev/null; then
      host="SubScan"
 else
      host=$1
