@@ -236,13 +236,13 @@ for arg in "$@"; do
             checkarg $1 -i "Error, must specify a target"
             $echoLog "[+verbose] Running NBTScan"
             nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
+            $echoLog "[+verbose] Enumerating Shares"
+            smbclient -L $1 -N > ~/Desktop/$host-SMBScan/shares.txt 
+            wait 
             $echoLog "[+verbose] Running Enum4Linux (this scan takes the longest)"
             enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
             wait
             grep -i os= ~/Desktop/$host-SMBScan/enum4linux.txt
-            wait 
-            $echoLog "[+verbose] Enumerating Shares"
-            smbclient -L $1 -N > ~/Desktop/$host-SMBScan/shares.txt 
             wait ;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
             $echoLog "[+verbose] Running Locate on nmap/scripts"
