@@ -192,7 +192,7 @@ for arg; do
     case $arg in
       -l) checkonlyarg "$1" "-l" "Error, -l must be the only argument" "$2" ;;
       -i) checkonlyarg "$2" "-i" "Error, -i cannot be run with anything else." "$3" ;;
-      -i) checkonlyarg "$1" "--update" "Error, --update cannot be run with anything else." "$2" ;;
+      --update) checkonlyarg "$1" "--update" "Error, --update cannot be run with anything else." "$2" ;;
     esac
 done
 
