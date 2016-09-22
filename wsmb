@@ -89,7 +89,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=3.0
+VERSION=3.0.1
 
 ###########################
 ####Setting up functions[*]
@@ -181,6 +181,8 @@ if [[ $1 == *[/]* ]]; then
      host="sub$hostl"
 elif echo "$1" | grep '[0-9]' >/dev/null; then
      host=$(echo $1 | cut -d"." -f4)
+elif echo "$1" | grep '*' >/dev/null;
+     host="SubScan"
 else
      host=$1
 fi

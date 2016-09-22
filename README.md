@@ -1,4 +1,4 @@
-# SMBScan - Current Version 3.0
+# SMBScan - Current Version 3.0.1
 
 <pre>
  __      __        .__       .___         _________   _____ __________ 
@@ -96,6 +96,11 @@ Everything you scan will be saved in a corresponding file with the scan name in 
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
 
 #Changelog
+*3.0.1
+<ul>
+<li> Folder naming fixes</li>
+</ul>
+
 *3.0
 <ul>
 <li> Added new intensive scan option (-i)</li>
