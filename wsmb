@@ -65,7 +65,7 @@ fi
 #First part checks to make sure we have a host or any variable given.  If not, help options are displayed
 if [ -z "$1" ]; then
 echo "[*] SMB Scanning Tool"
-echo "[*] Checks SMB for openings, no arguments scans against NSE scripts for vulns."
+echo "[*] Checks SMB for openings, no options scans against NSE scripts for vulns."
 echo "[*] Usage: wsmb <target> [options]"
 echo "options:"
 echo "-h, --help                    Show Brief Help"
@@ -83,6 +83,7 @@ echo "-brute                        Brute force SMB"
 echo "-i                            Do a full intensive scan of SMB on the machine"
 echo "-v                            Verbose output"
 echo "--update                      Updates WSMB"
+echo "--version                     Displays current wsmb Version"
 exit 0
 fi
 
@@ -387,7 +388,7 @@ for arg in "$@"; do
             exit 0;;
         -*) $echoLog "[+verbose] Running Help Menu" 
             echo "[*] SMB Scanning Tool"
-            echo "[*] Checks SMB for openings, no arguments scans against NSE scripts for vulns."
+            echo "[*] Checks SMB for openings, no options scans against NSE scripts for vulns."
             echo "[*] Usage: wsmb <domain name> -options"
             echo "options:"
             echo "-h, --help                    show brief help"
@@ -405,6 +406,7 @@ for arg in "$@"; do
             echo "-i                            Do a full intensive scan of SMB on the machine"
             echo "-v                            Verbose output"
             echo "--update                      Updates WSMB"
+            echo "--version                     Displays current wsmb Version"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
     esac

@@ -60,6 +60,8 @@ options:
 <br />
 --update                      Updates WSMB
 <br />
+--version                     Displays current installed version
+<br />
 <br />
 # Usage Examples
 <br />
