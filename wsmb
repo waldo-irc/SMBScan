@@ -376,6 +376,8 @@ for arg in "$@"; do
                       wait
                       rm -R SMBScan
                       echo "[*] Installed Version updated to $git"
+                 else
+                      echo "[*] Exiting, not updating from $VERSION"
                  fi
             fi
             exit 0;;

@@ -98,7 +98,8 @@ Several more features to come so a --update feature was added to automatically u
 <ul>
 <li> Added new intensive scan option (-i)</li>
 <li> Added dependency checks, for best experience allows you to install all dependencies quickly</li>
-<li> Removed constant Version check against the git, --update or --version must now be ran to check for and run updates.
+<li> Removed constant Version check against the git, --update or --version must now be ran to check for and run updates.</li>
+<li> When updating with --update you are now prompted before accepting the update</li>
 <li> Minor Fixes</li>
 </ul>
 
