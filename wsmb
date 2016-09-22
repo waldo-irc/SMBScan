@@ -83,7 +83,7 @@ echo "-brute                        Brute force SMB"
 echo "-i                            Do a full intensive scan of SMB on the machine"
 echo "-v                            Verbose output"
 echo "--update                      Updates WSMB"
-echo "--version                     Displays current wsmb Version"
+echo "--version                     Displays current wsmb Version and checks for updates"
 exit 0
 fi
 
@@ -408,7 +408,7 @@ for arg in "$@"; do
             echo "-i                            Do a full intensive scan of SMB on the machine"
             echo "-v                            Verbose output"
             echo "--update                      Updates WSMB"
-            echo "--version                     Displays current wsmb Version"
+            echo "--version                     Displays current wsmb Version and checks for updates"
             exit 0;;
         *)  dir=$arg ;; #This line is required to pass the target when given.  Gives anything given as an argument without a slash and passes it through to be used for the program.
     esac
