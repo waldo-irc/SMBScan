@@ -64,8 +64,8 @@ fi
 
 #First part checks to make sure we have a host or any variable given.  If not, help options are displayed
 if [ -z "$1" ]; then
-echo "[*] SMB Nmap NSE Scanner"
-echo "[*] Runs all available SMB NSE Scripts gainst victim target"
+echo "[*] SMB Scanning Tool"
+echo "[*] Checks SMB for openings, no arguments scans against NSE scripts for vulns."
 echo "[*] Usage: wsmb <target> [options]"
 echo "options:"
 echo "-h, --help                    Show Brief Help"
@@ -80,6 +80,7 @@ echo "-sb                           Run a full subnet SMB Scan with Banner Grabb
 echo "-c                            Run scan and empty directory"
 echo "-cx                           Empty dir without scan"
 echo "-brute                        Brute force SMB"
+echo "-i                            Do a full intensive scan of SMB on the machine"
 echo "-v                            Verbose output"
 echo "--update                      Updates WSMB"
 exit 0
@@ -87,9 +88,10 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=2.0.3
+VERSION=3.0
 
-#Setting up functions[*]
+###########################
+####Setting up functions[*]
 # Use `$echoLog` everywhere you print verbose logging messages to console
 # By default, it is disabled and will be enabled with the `-v` or `--verbose` flags
 declare echoLog='silentEcho'
@@ -117,9 +119,26 @@ fi
 cleandirexist () { 
 if [ -d ~/Desktop/$host-SMBScan ]; then
      echo "[*] Cleaning Directory"
-     rm -rf ~/Desktop/$host-SMBScan/NSE/* &
+     rm -rf ~/Desktop/$host-SMBScan/* &
 else
      echo "[*] Directory Does Not Exist!"
+fi
+}
+
+snapshot () {
+read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
+if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
+     gnome-screenshot --window -f ~/Desktop/$host-SMBScan/$1.jpg
+fi
+}
+
+existchecks () {
+$echoLog "[+verbose] Checking if $2 installed."
+if [ ! -f "$1" ]; then
+     read -p "<$2 Not installed, required for full functionality.  Install now?>  Y/n: " CONDITION;
+     if [ "$CONDITION" == "Y" ] || [ "$CONDITION" == "y" ] || [ -z "$CONDITION" ]; then
+          sudo apt-get install "$2" -y
+     fi 
 fi
 }
 
@@ -130,41 +149,29 @@ if [ "$1" == "$2" ]; then
 fi
 }
 
-snapshot () {
-read -p "<Take a Screenshot of window (Takes SS of terminal, enlarge to capture whole terminal)?> : y/N: " CONDITION;
-if [ "$CONDITION" == "y" ] || [ "$CONDITION" == "Y" ]; then
-     gnome-screenshot --window -f ~/Desktop/$host-SMBScan/$1.jpg
+checkonlyarg () {
+if [ -z "$4" ] || [ "$4" == "-v" ] && [ "$1" == "$2" ]; then
+     :
+else
+     echo "[*] $3" 
+     exit 0
 fi
 }
-#End Functions[*]
 
-#These arguments need to run first always.
-for arg; do
-    case $arg in
-      -v) checkarg $1 -v "Error, must specify a target"
-          echoLog='echo'; ;;
-      -c) checkarg $1 -c "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -c"
-          cleandirexist;;
-      -cx) checkarg $1 -cx "[*] Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -cx"
-          cleandirexist
-          exit 0;;
-    esac
-done
-
-#update Locate DB
-$echoLog "[+verbose] Running updatedb." 
-updatedb
-
-#checks for updates and notifies if available
+checkupdate () {
 $echoLog "[+verbose] Checking github for version updates." 
 git=$(curl --silent https://github.com/waldo-irc/SMBScan/blob/master/wsmb | grep 'VERSION=' | cut -d">" -f2 | cut -d"<" -f1 | cut -d"=" -f 2)
 if [ "$git" == "$VERSION" ]; then
-     :
-elif [ "$1" != "--update" ]; then
+     echo "[*] Current version is latest."
+else
      echo "[****] Update Available"
      echo "[****] Version update from $VERSION to $git"
-     echo "[****] Read Changelog for more info. https://github.com/waldo-irc/SMBScan/blob/master/README.md"
+     echo "[****] Read Changelog for more info. https://github.com/waldo-irc/SMBScan/blob/master/README.md"    
+     update="1"
 fi
+}
+####End Functions[*]
+####################
 
 #store our final octet for final naming into $host
 $echoLog "[+verbose] Grepping Host for foldername creation." 
@@ -177,24 +184,72 @@ else
      host=$1
 fi
 
+#These arguments need to run very first as they must run alone.
+for arg; do
+    case $arg in
+      -l) checkonlyarg "$1" "-l" "Error, -l must be the only argument" "$2" ;;
+      -i) checkonlyarg "$2" "-i" "Error, -i cannot be run with anything else." "$3" ;;
+      -i) checkonlyarg "$1" "--update" "Error, --update cannot be run with anything else." "$2" ;;
+    esac
+done
+
+#These arguments need to run next.
+for arg; do
+    case $arg in
+      -v) checkarg $1 -v "Error, must specify a target"
+          echoLog='echo'; ;;
+      -c) checkarg $1 -c "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -c"
+          cleandirexist;;
+      -cx) checkarg $1 -cx "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -cx"
+          if [ "$3" ]; then
+               echo "[!!!] No other arguments can be used with '-cx'."
+               exit 0
+          else
+               cleandirexist
+          fi
+          exit 0;;
+    esac
+done
+
+#update Locate DB
+$echoLog "[+verbose] Running updatedb." 
+updatedb
+
+#checking for dependencies
+existchecks /usr/bin/enum4linux enum4linux
+existchecks /usr/bin/smbmap smbmap
+existchecks /usr/bin/nbtscan nbtscan
+existchecks /usr/bin/smbclient smbclient
+existchecks /usr/bin/nmap nmap
+existchecks /usr/bin/acccheck acccheck
+
 #Here we set up our options and arguments
 for arg in "$@"; do
     case $arg in
         -v) echo "[/*\]"
             $echoLog "[+verbose] Running in Verbose Mode" ;;
+        -i) echo "[*] Running Intensive Scan Against Target"
+            direxist
+            checkarg $1 -i "Error, must specify a target"
+            $echoLog "[+verbose] Running NBTScan"
+            nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
+            $echoLog "[+verbose] Running Enum4Linux (this scan takes the longest)"
+            enum4linux $1 > ~/Desktop/$host-SMBScan/enum4linux.txt &
+            wait
+            grep -i os= ~/Desktop/$host-SMBScan/enum4linux.txt
+            wait 
+            $echoLog "[+verbose] Enumerating Shares"
+            smbclient -L $1 -N > ~/Desktop/$host-SMBScan/shares.txt 
+            wait ;;
         -l) echo "[*] Following SMB NSE scripts are available on your computer: "
-            if [[ "$1" != "-l" ]] && [[ "$2" != "-l" ]]; then
-                 echo "[*] Error, -l must be only argument"
-            else
-                 $echoLog "[+verbose] Running Locate on nmap/scripts"
-                 loc
-                 echo "[*] End"
-            fi
+            $echoLog "[+verbose] Running Locate on nmap/scripts"
+            loc
+            echo "[*] End"
             exit 0;;
         -n) echo "[*] Running NBTScan Against Target"
             direxist
             checkarg $1 -n "Error, must specify a target"
-            $echoLog "[+verbose] Running Scans" 
+            $echoLog "[+verbose] Running NBTScans" 
             nbtscan $1 > ~/Desktop/$host-SMBScan/nbtscan.txt & 
             wait ;;
         -map) echo "[*] Mapping Shares with SMBMap"
@@ -260,7 +315,7 @@ for arg in "$@"; do
             $echoLog "[+verbose] Running SMBClient to check shares." 
             SHARE="${arg#*=}"
             if [ -z "$SHARE" ] || [ "$SHARE" == "-sh" ]; then
-                 smbclient -L $1
+                 smbclient -L $1 -N
                  read -p "[*] Would you like to access smb share? (Y/n): " answer;
             else 
                  answer=Y
@@ -303,31 +358,31 @@ for arg in "$@"; do
             exit 0;;
         --update) echo "[*] wsmb Version $VERSION"
             echo "[*] Updating WSMB"
-            if [ "$1" != "--update" ]; then
-                 echo "[*] Error!  Must be used as wsmb --update"
+            checkupdate
+            echo "$git Git Version"
+            echo "$VERSION Installed Version"
+            #Uncomment below for debugging
+            #echo "$ABSOLUTE_PATH"
+            if [ "$update" != "1" ]; then
+                 exit 0;
             else
-                 echo "$git Git Version"
-                 echo "$VERSION Installed Version"
-                 #Uncomment below for debugging
-                 #echo "$ABSOLUTE_PATH"
-                 if [ "$git" == "$VERSION" ]; then
-                      echo "[*] Installed Version is latest"
-                 else
-                      echo "[*] Needs an update!"
-                      git clone https://github.com/waldo-irc/SMBScan.git
-                      echo "[*] Installing to $ABSOLUTE_PATH"
-                      mv SMBScan/wsmb $ABSOLUTE_PATH
-                      echo "[*] Cleaning up"
-                      wait
-                      rm -R SMBScan
-                      echo "[*] Installed Version updated to $git"
-                 fi
+                 echo "[*] Needs an update!"
+                 git clone https://github.com/waldo-irc/SMBScan.git
+                 echo "[*] Installing to $ABSOLUTE_PATH"
+                 mv SMBScan/wsmb $ABSOLUTE_PATH
+                 echo "[*] Cleaning up"
+                 wait
+                 rm -R SMBScan
+                 echo "[*] Installed Version updated to $git"
             fi
             exit 0;;
-        --version) echo "[*] Version $VERSION"
+        --version) checkupdate
+            echo "[*] Version $VERSION"
+            echo "[*] Exiting"
             exit 0;;
-        -*) echo "[*] SMB Nmap NSE Scanner"
-            echo "[*] Runs all available SMB NSE Scripts gainst victim target"
+        -*) $echoLog "[+verbose] Running Help Menu" 
+            echo "[*] SMB Scanning Tool"
+            echo "[*] Checks SMB for openings, no arguments scans against NSE scripts for vulns."
             echo "[*] Usage: wsmb <domain name> -options"
             echo "options:"
             echo "-h, --help                    show brief help"
@@ -342,6 +397,7 @@ for arg in "$@"; do
             echo "-c                            Run scan and empty directory"
             echo "-cx                           Empty dir without scan"
             echo "-brute                        Brute force SMB"
+            echo "-i                            Do a full intensive scan of SMB on the machine"
             echo "-v                            Verbose output"
             echo "--update                      Updates WSMB"
             exit 0;;

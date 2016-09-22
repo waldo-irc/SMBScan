@@ -1,4 +1,4 @@
-# SMBScan - Current Version 2.0.3
+# SMBScan - Current Version 3.0
 
 <pre>
  __      __        .__       .___         _________   _____ __________ 
@@ -14,13 +14,13 @@ Scans SMB for Vulnerabilities Assessment
 <br />
 <br />
 Work in progress, looking to implement several things still.
-Uses nmap but packages all the NSE scans in one script for quick assessment instead of having to pop each NSE one by one!
+Uses nmap but packages all the NSE scans in one script for quick assessment as well as enumerating shares/smb servers and banner grabbing.
 Also does Enum4linux with -e flag and nbtscan with -n flag.
 
 Please use responsibly and with permission only.  I do not condone unauthorized uses and will not be responsible for anything unethical commited with these.
 <br />
 <br />
-Uses Nmap, Enum4linux, NBTSCAN, etc. in order to scan smb for vulnerabilities and enumerating shares and samba servers.
+Uses Nmap, Enum4linux, NBTSCAN, etc. in order to scan smb for vulnerabilities and enumerating shares and samba servers.  The script will check if you have these dependencies installed and offer to install them if you don't.
 <br />
 <br />
 It can scan a subrange since it just uses nmap for the heavy lifting.
@@ -40,7 +40,7 @@ options:
 <br />
 -map                          Enumerate with smbmap
 <br />
--sh                           List and login to an SMB Share
+-sh or -sh='Share'            List and login to an SMB Share
 <br />
 -s                            Run a full subnet SMB Scan without Banner Grabbing
 <br />
@@ -52,6 +52,12 @@ options:
 <br />
 -cx                           Empty dir without scan
 <br />
+-brute                        Brute force SMB
+<br />
+-i                            Do a full intensive scan of SMB on the machine
+<br />
+-v                            Verbose output
+<br />
 --update                      Updates WSMB
 <br />
 <br />
@@ -61,7 +67,7 @@ options:
 It has the ability to check for ports 139,445 SMB.  You can search for all servers with these ports open by running:
 <br />
 <br />
-wsmb 192.168.1.* -qs
+EX: wsmb 192.168.1.* -qs
 <br />
 <br />
 This does a quick scan in order to get an idea of every machine with ports 139,445 open on your subnet.  -s defaults to a full scan with hostname enumeration and -sb includes nmap banner grabbing as well.
@@ -70,10 +76,16 @@ This does a quick scan in order to get an idea of every machine with ports 139,4
 Once you've decided on a target, you can run every smb nse script available on your system against the target with:
 <br />
 <br />
-wsmb 192.168.1.1
+EX: wsmb 192.168.1.1
 <br />
 <br />
-And if you'd like you can include enum4linux with -e and an NBTScan with -n
+And if you'd like you can include enum4linux with -e and an NBTScan with -n.  An intensive scan can be run with -i, doing enum4linux, nbtscan, banner grabbing, and enumerating all samba shares (by checking if anon login is allowed) as well as running all NSE scripts against target.
+<br />
+<br />
+EX: wsmb 192.168.1.1 -e -n (Runs NSE Scripts, enum4linux, and nbtscan)
+<br />
+<br />
+EX: wsmb 192.168.1.1 -i (Does a full run SMB enumeration)
 <br />
 <br />
 Everything you scan will be saved in a corresponding file with the scan name in a folder named (last 2 digits of IP)/hostname-SMBScan on your Desktop.
@@ -82,7 +94,13 @@ Everything you scan will be saved in a corresponding file with the scan name in 
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
 
 #Changelog
-** Plans to reduce output down to importance only to keep screen clear.  -v will show full output.
+*3.0
+<ul>
+<li> Added new intensive scan option (-i)</li>
+<li> Added dependency checks, for best experience allows you to install all dependencies quickly</li>
+<li> Removed constant Version check against the git, --update or --version must now be ran to check for and run updates.
+<li> Minor Fixes</li>
+</ul>
 
 *2.0.2-2.0.3
 <ul>
