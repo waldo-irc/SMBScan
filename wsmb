@@ -367,13 +367,16 @@ for arg in "$@"; do
                  exit 0;
             else
                  echo "[*] Needs an update!"
-                 git clone https://github.com/waldo-irc/SMBScan.git
-                 echo "[*] Installing to $ABSOLUTE_PATH"
-                 mv SMBScan/wsmb $ABSOLUTE_PATH
-                 echo "[*] Cleaning up"
-                 wait
-                 rm -R SMBScan
-                 echo "[*] Installed Version updated to $git"
+                 read -p "[*] Update script? Y/n: " CONDITION:
+                 if [ "$CONDITION" == "Y" ] || [ "$CONDITION" == "y" ] || [ -z "$CONDITION" ]; then
+                      git clone https://github.com/waldo-irc/SMBScan.git
+                      echo "[*] Installing to $ABSOLUTE_PATH"
+                      mv SMBScan/wsmb $ABSOLUTE_PATH
+                      echo "[*] Cleaning up"
+                      wait
+                      rm -R SMBScan
+                      echo "[*] Installed Version updated to $git"
+                 fi
             fi
             exit 0;;
         --version) checkupdate
