@@ -82,6 +82,7 @@ echo "-cx                           Empty dir without scan"
 echo "-brute                        Brute force SMB"
 echo "-i                            Do a full intensive scan of SMB on the machine"
 echo "-v                            Verbose output"
+echo "-vv                           Increase verbosity"
 echo "--update                      Updates WSMB"
 echo "--version                     Displays current wsmb Version and checks for updates"
 exit 0
@@ -204,6 +205,8 @@ for arg; do
     case $arg in
       -v) checkarg $1 -v "Error, must specify a target"
           echoLog='echo'; ;;
+      -vv) checkarg $1 -vv "Error, must specify a target" 
+           set -x;;
       -c) checkarg $1 -c "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -c"
           cleandirexist;;
       -cx) checkarg $1 -cx "Error, must specifiy which directory to clear with target name Ex: wsmb 192.168.1.25 -cx"
@@ -414,6 +417,7 @@ for arg in "$@"; do
             echo "-brute                        Brute force SMB"
             echo "-i                            Do a full intensive scan of SMB on the machine"
             echo "-v                            Verbose output"
+            echo "-vv                           Increase verbosity"
             echo "--update                      Updates WSMB"
             echo "--version                     Displays current wsmb Version and checks for updates"
             exit 0;;
