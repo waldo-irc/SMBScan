@@ -90,7 +90,7 @@ fi
 
 #setting global variables
 ABSOLUTE_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
-VERSION=3.0.2
+VERSION=3.0.3
 
 ###########################
 ####Setting up functions[*]

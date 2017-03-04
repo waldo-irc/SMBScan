@@ -1,4 +1,4 @@
-# SMBScan - Current Version 3.0.2
+# SMBScan - Current Version 3.0.3
 
 <pre>
  __      __        .__       .___         _________   _____ __________ 
@@ -96,6 +96,11 @@ Everything you scan will be saved in a corresponding file with the scan name in 
 Several more features to come so a --update feature was added to automatically update your script from the github version.  Checks your current version against github version and if current version doesnt match, updates your file.
 
 #Changelog
+*3.0.3
+<ul>
+<li> Verbosity addition -vv</li>
+</ul>
+
 *3.0.2
 <ul>
 <li> Cleaned up dependency checks</li>
